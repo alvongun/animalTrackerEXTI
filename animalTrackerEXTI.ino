@@ -371,8 +371,8 @@ void setup() {
   Serial.begin(115200); // this is only the baud rate for monitoring not for communicating fona module since the fona module use software serial not hardware serial
   Serial.println(F("*** SIMCom Module IoT Example ***"));
   
-  pinMode(13, OUTPUT);
-  digitalWrite(13, HIGH);
+  pinMode(13, OUTPUT); // set to output but later fona will set back to input
+  digitalWrite(13, HIGH); // when initializing SD Card Mount, this will prevent entering SPI Mode
   delay(10);
   // Initialize the MicroSD
   Serial.print("Initializing the MicroSD card module... ");
