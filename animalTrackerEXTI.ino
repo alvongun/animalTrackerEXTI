@@ -428,30 +428,6 @@ void loop() {
   // float hic = dht.computeHeatIndex(t, h, false);
   // ----------------DHT22 LOOP-------------------
 
-  /*--------------CAMERA SETUP SECTION--------------*/
-  // Disable brownout detector
-  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
-
-
-
-  // initialize EEPROM with predefined size
-//  EEPROM.begin(EEPROM_SIZE);
-//  pictureCount = EEPROM.read(0) + 1;
-
-  // Path where new picture will be saved in SD Card
-  String path = "/image" + String(1) + ".jpg";
-  Serial.printf("Picture file name: %s\n", path.c_str());
-
-  // Take and Save Photo
-  // char *fileinput;
-  // unsigned int fileSize;
-  String picdataBase64;
-  takeNewPhoto(path, picdataBase64);
-  // std::string picInString = bufferToString(fileinput, fileSize);
-  // Update EEPROM picture number counter
-//  EEPROM.write(0, pictureCount);
-//  EEPROM.commit();
-/*-------------- END CAMERA SETUP SECTION--------------*/
   // Connect to cell network and verify connection
   // If unsuccessful, keep retrying every 2s until a connection is made
   int counter = 0;
@@ -536,8 +512,33 @@ void loop() {
   #ifdef GPS_ON
   setTime(hr, mint, sec, dy, mth, yr);
   ts = now();
-  // ts = now()*1000; // change from s to ms
   #endif
+
+  /*--------------CAMERA SETUP SECTION--------------*/
+  // Disable brownout detector
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
+
+
+
+  // initialize EEPROM with predefined size
+//  EEPROM.begin(EEPROM_SIZE);
+//  pictureCount = EEPROM.read(0) + 1;
+
+  // Path where new picture will be saved in SD Card
+  String path = "/image" + String(ts) + ".jpg";
+  Serial.printf("Picture file name: %s\n", path.c_str());
+
+  // Take and Save Photo
+  // char *fileinput;
+  // unsigned int fileSize;
+  String picdataBase64;
+  takeNewPhoto(path, picdataBase64);
+  // std::string picInString = bufferToString(fileinput, fileSize);
+  // Update EEPROM picture number counter
+//  EEPROM.write(0, pictureCount);
+//  EEPROM.commit();
+/*-------------- END CAMERA SETUP SECTION--------------*/
+
   // Format the floating point numbers
   dtostrf(latitude, 1, 6, latBuff);
   dtostrf(longitude, 1, 6, longBuff);
