@@ -523,7 +523,7 @@ void loop() {
   // initialize EEPROM with predefined size
 //  EEPROM.begin(EEPROM_SIZE);
 //  pictureCount = EEPROM.read(0) + 1;
-
+  #ifdef IMG_ON
   // Path where new picture will be saved in SD Card
   String path = "/image" + String(ts) + ".jpg";
   Serial.printf("Picture file name: %s\n", path.c_str());
@@ -533,6 +533,7 @@ void loop() {
   // unsigned int fileSize;
   String picdataBase64;
   takeNewPhoto(path, picdataBase64);
+  #endif
   // std::string picInString = bufferToString(fileinput, fileSize);
   // Update EEPROM picture number counter
 //  EEPROM.write(0, pictureCount);
