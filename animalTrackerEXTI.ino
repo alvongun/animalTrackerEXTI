@@ -28,10 +28,10 @@
 #define FONA_RX 13 // Microcontroller TX
 //#define T_ALERT 12 // Connect with solder jumper
 
-#define GPS_ON
+// #define GPS_ON
 #define TEMP_ON
 // #define DUMMY_ON
-#define IMG_ON
+// #define IMG_ON
 // #define NVR_END
 
 #include "SoftwareSerial.h"
@@ -78,6 +78,7 @@ char URL_TMP[200];  // Make sure this is long enough for your request URL
 char URL_HUM[200];  // Make sure this is long enough for your request URL
 char body[100]; // Make sure this is long enough for POST body
 char bodyTMP[200]; // Make sure this is long enough for POST body
+char fileBuff[200];
 char latBuff[12], longBuff[12], locBuff[50], speedBuff[12], imgFailBuff[3],
      headBuff[12], altBuff[12], tempBuff[12], humidBuff[12], battBuff[12], tsBuff[20];
 unsigned long long ts;
@@ -283,6 +284,24 @@ void takeNewPhoto(String path, String& output) {
 //}
   // Return the frame buffer back to the driver for reuse
   esp_camera_fb_return(fb);
+}
+
+void appendFile(const char * message){
+    fs::FS &fs = SD_MMC;
+    char telemetryPath[13] = "/history.txt";
+    Serial.printf("Appending to file: %s\n", telemetryPath);
+
+    File file = fs.open(telemetryPath, FILE_APPEND);
+    if(!file){
+        Serial.println("Failed to open file for appending");
+        return;
+    }
+    if(file.print(message)){
+        Serial.println("Message appended");
+    } else {
+        Serial.println("Append failed");
+    }
+    file.close();
 }
 
 boolean initFONA(){
@@ -533,6 +552,11 @@ void loop() {
   // unsigned int fileSize;
   String picdataBase64;
   takeNewPhoto(path, picdataBase64);
+  // sprintf(body, "{\"pic\":%s}", picdataBase64.c_str());
+  unsigned char success = true;
+  String payload("{\"pic\":\"");
+  success &= payload.concat(picdataBase64);
+  success &= payload.concat("\"}");
   #endif
   // std::string picInString = bufferToString(fileinput, fileSize);
   // Update EEPROM picture number counter
@@ -606,11 +630,6 @@ void loop() {
   #else
     // sprintf(URL, "http://dweet.io/dweet/for/%s", imei);
 //    sprintf(body, "{\"lat\":%s,\"long\":%s}", latBuff, longBuff);
-    // sprintf(body, "{\"pic\":%s}", picdataBase64.c_str());
-    unsigned char success = true;
-    String payload("{\"pic\":\"");
-    success &= payload.concat(picdataBase64);
-    success &= payload.concat("\"}");
 
     // Let's try a POST request to thingsboard.io
     // Please note this can me memory-intensive for the Arduino Uno
@@ -635,6 +654,16 @@ void loop() {
     sprintf(bodyTMP, "{\"temperature\":%s,\"humidity\":%s,\"long\":%s,\"lat\":%s}", tempBuff, humidBuff, longBuff, latBuff);
     #endif
 
+    #ifndef GPS_ON
+    sprintf(fileBuff, ",%s,%s,%s,%s\n", tempBuff, humidBuff, longBuff, latBuff);
+    appendFile(fileBuff);
+    #endif
+    
+    #ifdef GPS_ON
+    sprintf(fileBuff, "%llu,%s,%s,%s,%s\n", ts, tempBuff, humidBuff, longBuff, latBuff);
+    appendFile(fileBuff);
+    #endif
+    
     dtostrf(imgFail, 1, 0, imgFailBuff);
     sprintf(body, "{\"imgfail\":%s}", imgFailBuff);
 
