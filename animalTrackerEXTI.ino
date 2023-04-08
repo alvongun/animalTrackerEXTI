@@ -28,10 +28,10 @@
 #define FONA_RX 13 // Microcontroller TX
 //#define T_ALERT 12 // Connect with solder jumper
 
-// #define GPS_ON
+#define GPS_ON
 #define TEMP_ON
 // #define DUMMY_ON
-// #define IMG_ON
+#define IMG_ON
 // #define NVR_END
 
 #include "SoftwareSerial.h"
@@ -411,7 +411,7 @@ void setup() {
     digitalWrite(LED, LOW);
   #endif
   
-  fonaSS.begin(38400); // baudrate for the software serial
+  fonaSS.begin(19200); // baudrate for the software serial
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_4, 1);
   pinMode(FONA_RST, OUTPUT);
   // pinMode(FONA_PWRKEY, INPUT);
